@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model LessonPlan {
+  id            String   @id @default(cuid())
+  title         String
+  objective     String
+  summary       String   @db.Text
+  scheduledDate DateTime @map("scheduled_date")
+  discipline    String
+  contents      String   @db.Text
+  resources     String   @db.Text
+  tags          Tag[]
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("lesson_plans")
+}
+
+model Tag {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  lessonPlans LessonPlan[]
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  @@map("tags")
+}
