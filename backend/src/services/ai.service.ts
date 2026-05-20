@@ -55,8 +55,37 @@ async function callOpenAI(prompt: string): Promise<string> {
     throw new Error(`OpenAI API error (${response.status}): ${errorBody}`);
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as {
+    choices: { message: { content: string } }[];
+  };
   return data.choices[0].message.content;
+}
+
+async function callGoogle(prompt: string): Promise<string> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${env.AI_MODEL}:generateContent?key=${env.AI_API_KEY}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      generationConfig: {
+        temperature: 0.7,
+        responseMimeType: "application/json",
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Google AI API error (${response.status}): ${errorBody}`);
+  }
+
+  const data = (await response.json()) as {
+    candidates: { content: { parts: { text: string }[] } }[];
+  };
+  return data.candidates[0].content.parts[0].text;
 }
 
 async function callAnthropic(prompt: string): Promise<string> {
@@ -80,7 +109,9 @@ async function callAnthropic(prompt: string): Promise<string> {
     throw new Error(`Anthropic API error (${response.status}): ${errorBody}`);
   }
 
-  const data = await response.json();
+  const data = (await response.json()) as {
+    content: { text: string }[];
+  };
   return data.content[0].text;
 }
 
@@ -91,10 +122,17 @@ export async function getAIRecommendations(
   const startTime = Date.now();
 
   try {
-    const rawResponse =
-      env.AI_PROVIDER === "anthropic"
-        ? await callAnthropic(userPrompt)
-        : await callOpenAI(userPrompt);
+    let rawResponse: string;
+    switch (env.AI_PROVIDER) {
+      case "google":
+        rawResponse = await callGoogle(userPrompt);
+        break;
+      case "anthropic":
+        rawResponse = await callAnthropic(userPrompt);
+        break;
+      default:
+        rawResponse = await callOpenAI(userPrompt);
+    }
 
     const latency = ((Date.now() - startTime) / 1000).toFixed(2);
 

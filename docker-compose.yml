@@ -28,9 +28,9 @@ services:
       PORT: "3333"
       NODE_ENV: production
       CORS_ORIGIN: http://localhost:3000
-      AI_PROVIDER: ${AI_PROVIDER:-openai}
+      AI_PROVIDER: ${AI_PROVIDER:-google}
       AI_API_KEY: ${AI_API_KEY}
-      AI_MODEL: ${AI_MODEL:-gpt-4o-mini}
+      AI_MODEL: ${AI_MODEL:-gemini-2.0-flash}
     depends_on:
       db:
         condition: service_healthy

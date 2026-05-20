@@ -24,6 +24,7 @@ jobs:
       - run: npx prisma generate
       - run: npm run lint
       - run: npx prettier --check "src/**/*.ts"
+      - run: npm test
 
   lint-frontend:
     name: Lint Frontend
