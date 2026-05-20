@@ -8,7 +8,7 @@ const envSchema = z.object({
     .default("development"),
   DATABASE_URL: z.string().url(),
   CORS_ORIGIN: z.string().default("http://localhost:3000"),
-  AI_PROVIDER: z.enum(["openai", "anthropic"]).default("openai"),
+  AI_PROVIDER: z.enum(["openai", "anthropic", "google"]).default("openai"),
   AI_API_KEY: z.string().min(1, "AI_API_KEY is required"),
   AI_MODEL: z.string().default("gpt-4o-mini"),
 });
